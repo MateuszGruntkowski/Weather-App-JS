@@ -2,27 +2,40 @@ import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
 
 // Define a variable to store the search value
 const inputElement = document.querySelector('.js-change-location-input');
+const searchButton = document.querySelector('.js-search-button');
+const leftPanelBackground = document.querySelector('.js-left-panel');
 let search = inputElement.value;
 
-inputElement.addEventListener('keydown', async (event) => {
-    if (event.key === 'Enter') {
-        // Update the search value when Enter is pressed
-        search = inputElement.value;
-        console.log('Search Value:', search);
 
-        // Call the fetch function to get the location data
+inputElement.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        removeClasses()
+        handleSearch()
+    }
+});
+
+searchButton.addEventListener('click', async ()=>{
+    removeClasses()
+    handleSearch();
+})
+
+async function handleSearch() {
+    search = inputElement.value;
+    console.log('Search Value:', search);
+
+    try {
         const geolocationData = await geolocationFetch();
         const latitude = geolocationData.latitude;
         const longitude = geolocationData.longitude;
 
         const weatherData = await weatherDataFetch(latitude, longitude);
-        
-
-        setDataInfo(geolocationData);
+        setDateInfo(geolocationData);
         setWeatherData(weatherData);
-        
+    } catch (error) {
+        console.error('Error fetching data:', error);
     }
-});
+    
+}
 
 async function geolocationFetch() {
     // Build the URL inside the function to ensure it uses the updated search value
@@ -56,9 +69,24 @@ async function weatherDataFetch(latitude, longitude){
         
         let weatherData = {
             dayZeroData: {},
-            dayOneData: {},
-            dayTwoData: {},
-            dayThreeData: {},
+            dayOneData: {
+                temperature_2m_max: responseJSON.daily.temperature_2m_max[1],
+                precipitation_probability_max: responseJSON.daily.precipitation_probability_max[1],
+                wind_speed_10m_max: responseJSON.daily.wind_speed_10m_max[1],
+                weather_code: responseJSON.daily.weather_code[1]
+            },
+            dayTwoData: {
+                temperature_2m_max: responseJSON.daily.temperature_2m_max[2],
+                precipitation_probability_max: responseJSON.daily.precipitation_probability_max[2],
+                wind_speed_10m_max: responseJSON.daily.wind_speed_10m_max[2],
+                weather_code: responseJSON.daily.weather_code[2]
+            },
+            dayThreeData: {
+                temperature_2m_max: responseJSON.daily.temperature_2m_max[3],
+                precipitation_probability_max: responseJSON.daily.precipitation_probability_max[3],
+                wind_speed_10m_max: responseJSON.daily.wind_speed_10m_max[3],
+                weather_code: responseJSON.daily.weather_code[3]
+            },
         };
 
         for(let i = 0; i <= hourlyTime.length-1; i++){
@@ -70,33 +98,8 @@ async function weatherDataFetch(latitude, longitude){
                     wind_speed_10m: responseJSON.hourly.wind_speed_10m[i],
                     weather_code: responseJSON.hourly.weather_code[i],
                 };
-            }else if (day1 === hourlyTime[i]){
-                weatherData.dayOneData = {
-                    temperature_2m: responseJSON.hourly.temperature_2m[i],
-                    precipitation_probability: responseJSON.hourly.precipitation_probability[i],
-                    relative_humidity_2m: responseJSON.hourly.relative_humidity_2m[i],
-                    wind_speed_10m: responseJSON.hourly.wind_speed_10m[i],
-                    weather_code: responseJSON.hourly.weather_code[i],
-                };
-            }else if(day2 === hourlyTime[i]){
-                weatherData.dayTwoData = {
-                    temperature_2m: responseJSON.hourly.temperature_2m[i],
-                    precipitation_probability: responseJSON.hourly.precipitation_probability[i],
-                    relative_humidity_2m: responseJSON.hourly.relative_humidity_2m[i],
-                    wind_speed_10m: responseJSON.hourly.wind_speed_10m[i],
-                    weather_code: responseJSON.hourly.weather_code[i],
-                };
-            }else if(day3 === hourlyTime[i]){
-                weatherData.dayThreeData = {
-                    temperature_2m: responseJSON.hourly.temperature_2m[i],
-                    precipitation_probability: responseJSON.hourly.precipitation_probability[i],
-                    relative_humidity_2m: responseJSON.hourly.relative_humidity_2m[i],
-                    wind_speed_10m: responseJSON.hourly.wind_speed_10m[i],
-                    weather_code: responseJSON.hourly.weather_code[i],
-                };
             }
         }
-
         
         console.log(weatherData);
         return weatherData;
@@ -105,7 +108,7 @@ async function weatherDataFetch(latitude, longitude){
     }
 }
 
-function setDataInfo(data){
+function setDateInfo(data){
     const dayLabel = dayjs().format('dddd');
     document.querySelector('.js-day-label').innerHTML = dayLabel;
 
@@ -147,50 +150,74 @@ function setWeatherData(weatherData){
     const day2 = today.add(2, 'day').format('ddd');
     const day3 = today.add(3, 'day').format('ddd');
 
-    let icons = getIcons(weatherData);
+    let weatherInfo = getIconsAndDescription(weatherData);
+    let weatherIcons = weatherInfo[0];
+    let weatherDescriptions = weatherInfo[1];
+    let weatherClasses = weatherInfo[2];
 
     document.querySelector('.js-forecast-container').innerHTML = 
         `
             <div class="forecast-card selected">
-                ${icons[0]}
+                ${weatherIcons[0]}
                 <div class="day">${day0}</div>
                 <div class="temp">${weatherData.dayZeroData.temperature_2m}</div>
             </div>
             <div class="forecast-card">
-                ${icons[1]}
+                ${weatherIcons[1]}
                 <div class="day">${day1}</div>
-                <div class="temp">${weatherData.dayOneData.temperature_2m}</div>
+                <div class="temp">${weatherData.dayOneData.temperature_2m_max}</div>
             </div>
             <div class="forecast-card">
-                ${icons[2]}
+                ${weatherIcons[2]}
                 <div class="day">${day2}</div>
-                <div class="temp">${weatherData.dayTwoData.temperature_2m}</div>
+                <div class="temp">${weatherData.dayTwoData.temperature_2m_max}</div>
             </div>
             <div class="forecast-card">
-                ${icons[3]}
+                ${weatherIcons[3]}
                 <div class="day">${day3}</div>
-                <div class="temp">${weatherData.dayThreeData.temperature_2m}</div>
+                <div class="temp">${weatherData.dayThreeData.temperature_2m_max}</div>
             </div>
+        `;
+
+    weatherIcons[0] = weatherIcons[0].slice(0, -6) + " weather-desc-icon" + weatherIcons[0].slice(-6);
+    document.querySelector('.js-weather-desc-container').innerHTML =
         `
+            ${weatherIcons[0]}
+            <div class="weather-desc-temp">${weatherData.dayZeroData.temperature_2m}</div>
+            <div class="weather-desc">${weatherDescriptions[0]}</div>
+        `
+
+    
+    leftPanelBackground.classList.add(weatherClasses[0]);
+        
 }
 
-function getIcons(weatherData){
+function getIconsAndDescription(weatherData){
 
-    let icons = [];
+    const weatherIcons = [];
+    const weatherDescriptions = [];
+    const weatherClasses = [];
+    const result = [];
 
     for(let day in weatherData){
         switch(weatherData[day].weather_code){
             case 0: 
-                icons.push('<i class="fa-solid fa-sun"></i>');
+                weatherIcons.push('<i class="fa-solid fa-sun"></i>');
+                weatherDescriptions.push('Sunny')
+                weatherClasses.push('left-panel-sun');
                 break;
             case 1:
             case 2:
             case 3:
-                icons.push('<i class="fa-solid fa-cloud-sun"></i>');
+                weatherIcons.push('<i class="fa-solid fa-cloud-sun"></i>');
+                weatherDescriptions.push('Mainly clear')
+                weatherClasses.push('left-panel-mainly-clear');
                 break;
             case 45:
             case 48:
-                icons.push('<i class="fa-solid fa-cloud"></i>');
+                weatherIcons.push('<i class="fa-solid fa-cloud"></i>');
+                weatherDescriptions.push('Cloudy')
+                weatherClasses.push('left-panel-cloudy');
                 break;
             case 51:
             case 53:
@@ -205,7 +232,9 @@ function getIcons(weatherData){
             case 80:
             case 81:
             case 82:
-                icons.push('<i class="fa-solid fa-cloud-rain"></i>');
+                weatherIcons.push('<i class="fa-solid fa-cloud-rain"></i>');
+                weatherDescriptions.push('Rainy');
+                weatherClasses.push('left-panel-rainy');
                 break;
             case 71:
             case 73:
@@ -213,21 +242,27 @@ function getIcons(weatherData){
             case 77:
             case 85:
             case 86:
-                icons.push('<i class="fa-solid fa-snowflake"></i>');
+                weatherIcons.push('<i class="fa-solid fa-snowflake"></i>');
+                weatherDescriptions.push('Snow');
+                weatherClasses.push('left-panel-snow');
                 break;
             case 95:
             case 96:
             case 99:
-                icons.push('<i class="fa-solid fa-cloud-bolt"></i>');
+                weatherIcons.push('<i class="fa-solid fa-cloud-bolt"></i>');
+                weatherDescriptions.push('Thunderstorm');
+                weatherClasses.push('left-panel-thunderstorm');
                 break;
             
         }
     }
-    console.log(icons);
-    return icons;
-
+    result.push(weatherIcons, weatherDescriptions, weatherClasses);
+    return result;
 }
 
-function dailyWeatherFetch(){
-
+function removeClasses(){
+    const weatherClasses = ['left-panel-thunderstorm', 'left-panel-snow', 'left-panel-rainy', 'left-panel-cloudy', 'left-panel-mainly-clear', 'left-panel-sun'];
+    weatherClasses.forEach((weatherClass) => {
+        leftPanelBackground.classList.remove(weatherClass);
+    });
 }

@@ -13,10 +13,17 @@ container {
     display: flex;
 }
 
-.left-panel {
+.left-panel, 
+.left-panel-sun,
+.left-panel-mainly-clear,
+.left-panel-cloudy,
+.left-panel-rainy,
+.left-panel-snow,
+.left-panel-thunderstorm
+{
     width: 465px;
     height: 100%;
-    background-image: url('images/beach.jpg');
+    /* background-image: url('images/beach.jpg'); */
     background-position: center;
     background-size: cover;
     position: relative; /* Umożliwia pozycjonowanie nakładki */
@@ -24,6 +31,29 @@ container {
     border-radius: 5%;
 }
 
+.left-panel-sun{
+    background-image: url('images/beach.jpg');
+}
+
+.left-panel-mainly-clear{
+    background-image: url('images/mainly-clear.jpg');
+}
+
+.left-panel-cloudy{
+    background-image: url('images/cloud.jpg');
+}
+
+.left-panel-rainy{
+    background-image: url('images/rain.jpg');
+}
+
+.left-panel-snow{
+    background-image: url('images/snow.jpg');
+}
+
+.left-panel-thunderstorm{
+    background-image: url('images/thunder.jpg');
+}
 .left-panel::before {
     content: '';
     position: absolute;
@@ -36,7 +66,7 @@ container {
     color: white;
 }
 
-.left-panel span, .weather-desc-container{
+.left-panel span, .weather-desc-container, .data-container{
     position: relative;
     z-index: 2; 
     color: white; 
@@ -103,6 +133,10 @@ container {
     justify-content: space-evenly;
 }
 
+/* .forecast-card:hover {
+    box-shadow: 3px 3px 5px 2px rgb(255, 255, 255);
+} */
+
 .forecast-card.selected {
     background-color: #FFFFFF;
     color: #2C2F3F;
@@ -128,7 +162,6 @@ container {
 .change-location-input{
     width: 300px;
     height: 50px;
-    
     border-radius: 3%;
     color: white;
     border: 0px;
@@ -140,6 +173,16 @@ container {
 input::placeholder {
     color: #24252f;
     font-size: 22px;
+}
+
+.search-button{
+    cursor: pointer;
+    margin-left: 10px;
+    background-color: #24252f;
+    color: white;
+    border-radius: 3%;
+    border: none;
+    outline: none;
 }
 
 
@@ -171,6 +214,8 @@ i {
 .fa-location-dot-data-row{
     font-size: 20px;
     margin-right: -6px;
+    /* color: rgb(3, 207, 253); */
+    color: white;
 }
 
 .date-label, .location-label{
@@ -198,3 +243,4 @@ i {
     font-size: 32px;
     font-weight: 300;
 }
+
