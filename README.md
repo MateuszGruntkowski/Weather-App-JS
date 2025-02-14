@@ -1,5 +1,8 @@
 # Weather App
+
 A simple weather application that displays current and forecasted weather conditions for a selected city.
+
+![Weather App Screenshot](images/weather-example-photo.png)
 
 ## Features
 - Fetch and display current weather for a selected location
